@@ -72,7 +72,9 @@ class TagController extends Controller
      */
     public function edit($id)
     {
-        //
+        $tag = Tag::where('id',$id)->first();
+
+        return view('admin.tag.edit', compact('tag'));
     }
 
     /**
@@ -84,7 +86,19 @@ class TagController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $this->validate( $request,[
+            'name' => 'required',        
+            'slug' => 'required',            
+        ]);
+    
+        $tag = Tag::find($id);
+    
+        $tag->name = $request->name;
+        $tag->slug = $request->slug;
+           
+        $tag->save();
+
+        return redirect(route('tag.index'));
     }
 
     /**
@@ -95,6 +109,8 @@ class TagController extends Controller
      */
     public function destroy($id)
     {
-        //
+        Tag::find($id)->delete();
+
+        return redirect()->back();
     }
 }

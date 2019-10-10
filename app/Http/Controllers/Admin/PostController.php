@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Model\User\Tag;
 use App\Model\User\Post;
+use App\Model\User\Category;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -26,8 +28,11 @@ class PostController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create()
-    {
-        return view('admin.post.create');
+    {   
+        $tags = Tag::all();
+        $categories = Category::all();
+
+        return view('admin.post.create',compact('tags','categories'));
     }
 
     /**
@@ -51,7 +56,8 @@ class PostController extends Controller
        $post->subtitle = $request->subtitle;
        $post->slug = $request->slug;
        $post->body = $request->body;
-       
+       $post->tags()->sync($request->tags);
+       $post->categories()->sync($request->categories);
        $post->save();
        
        return redirect(route('post.index'));
@@ -76,8 +82,12 @@ class PostController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
-    {
-        //
+    {   
+        $post = Post::where('id',$id)->first();
+        $tags = Tag::all();
+        $categories = Category::all();
+        
+        return view('admin.post.edit', compact('post','tags','categories'));
     }
 
     /**
@@ -88,8 +98,27 @@ class PostController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-    {
-        //
+    {   
+    
+        $this->validate( $request,[
+            'title' => 'required',
+            'subtitle' => 'required',
+            'slug' => 'required',
+            'body' => 'required'
+        ]);
+    
+        $post = Post::find($id);
+    
+        $post->title = $request->title;
+        $post->subtitle = $request->subtitle;
+        $post->slug = $request->slug;
+        $post->body = $request->body;
+        $post->tags()->sync($request->tags);
+        $post->categories()->sync($request->categories);
+           
+        $post->save();
+           
+        return redirect(route('post.index'));
     }
 
     /**
@@ -100,6 +129,8 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        //
+        Post::where('id',$id)->delete();
+        
+        return redirect()->back();
     }
 }
